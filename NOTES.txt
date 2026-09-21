@@ -1,0 +1,9 @@
+
+# Kokoro
+# https://github.com/nazdridoy/kokoro-tts
+python -m kokoro_tts - --stream
+
+# Moonshine
+# https://github.com/moonshine-ai/moonshine
+moonshine-voice mic --language en
+moonshine-voice tts --voice piper_en_US-joe-medium --text "But why did you do that? There was no need."
