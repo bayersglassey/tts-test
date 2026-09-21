@@ -1,0 +1,248 @@
+# A Voice-Controlled Programming Language
+
+## Overview
+
+This repo is an exploration of designing little programming languages which
+are intended to be used interactively with a text-to-speech interface.
+
+Why?.. because it's 2026, AI is the hype, but I don't like vibe coding.
+As a programmer, I like precision; as a person, I like talking to people.
+So, if people are going to be talking to their computers, I think it
+should be done in a language which is computer-specific.
+
+Here's a super simple example: a little stack-based language, using a **text**
+interface:
+```
+>>> 1 2 + 10
+3 10
+
+>>> *
+30
+
+>>> =x
+
+>>> x x +
+60
+
+>>> clear
+```
+
+Make sense? You can push numbers onto the stack, apply arithmetic operations
+to them, pop them off the stack into variables, and push them from variables
+back onto the stack.
+You can also clear the stack.
+
+Now, imagine an **audio** interface for that language.
+Here's the same example as above, but imagine that you and the computer are
+saying the following things out loud:
+```
+>>> "one two plus ten"
+"three ten"
+
+>>> "times"
+"thirty"
+
+>>> "store ex"
+
+>>> "ex ex plus"
+"sixty"
+
+>>> "clear"
+```
+
+Okay, now imagine supporting more complicated data types.
+How about functions?
+```
+>>> f: 10 * ;
+
+>>> 3 f f
+300
+```
+
+...and if we pronounce that:
+```
+>>> "define eff ten times end"
+
+>>> "three eff eff"
+"three hundred"
+```
+
+How about strings?
+Let's assume for now that we don't actually care about arbitrary strings,
+rather strings represent lists of words.
+Concatenating two strings (lists of words) results in another string (list
+of words), and we can check whether one string appears within another.
+```
+>>> 'hello' 'world'
+'hello' 'world'
+
+>>> +
+'hello world'
+
+>>> =message
+
+>>> message 'hello' in
+true
+
+>>> clear
+
+>>> message 'apple' in
+false
+```
+
+...now here's that example as audio:
+```
+>>> "word hello word world"
+"word hello word world"
+
+>>> "plus"
+"two words hello world"
+
+>>> "store message"
+
+>>> "message word hello in"
+"true"
+
+>>> "clear"
+
+>>> "message word apple in"
+"false"
+```
+
+Notice the "two words hello world" there, as a representation for the
+string `'hello world'`.
+The intent there is to actually have "two words hello world" be valid syntax
+for a string:
+```
+>>> 2 words hello world
+'hello world'
+
+>>> 'hello' 'world' + ==
+true
+```
+
+Similarly, in the text interface, `word hello` is equivalent to `'hello'`.
+More generally, as much as possible, it's nice if basic values have
+text and audio **representations** which can be used to recreate those values.
+For some values, like really big data structures, or non-data objects like
+sockets, this may not make as much sense; in those cases, we could use
+an **imperfect representation**, meaning one which can't be used to recreate
+the object.
+
+Let's consider lists.
+For small ones, we should use a perfect representation; for large ones, we
+should use an imperfect representation:
+```
+>>> [1 2 3]
+[1 2 3]
+
+>>> [4 5 6] +
+[1 2 3 ...and 3 more]
+...or maybe:
+[6: 1 2 3 ...]
+```
+
+...here's how we could pronounce that example:
+```
+>>> "list one two three end"
+"list one two three end"
+
+>>> "list four five six end plus"
+"list one two three and three more"
+...or maybe:
+"list of six one two three and so on"
+```
+
+Okay, that's enough for a basic overview!
+Read on for all the gory details.
+
+
+## Editing code, constructing large values, etc
+
+Use "print" to pop something off the stack and describe it:
+```
+>>> "one print"
+"one"
+
+>>> "two three times print"
+"six"
+```
+
+Use "string" to just say a bunch of words, until end of line/sentence:
+```
+>>> "string once upon a time"
+"ok"
+
+>>> "string there was a land"
+"ok"
+
+>>> "print"
+"four words once upon a time four words there was a land"
+
+>>> "plus store message"
+```
+
+Using multiple lines/sentences to build a large list:
+```
+>>> "list one two"
+"ok, in list"
+
+>>> "three end"
+"list one two three end"
+```
+
+Using multiple lines/sentences to define a large function:
+```
+>>> "define eff two times"
+"ok, in define eff"
+
+>>> "one plus end"
+"ok, defined eff"
+```
+
+
+## Equality
+
+Equality is tricky, because of homophones!..
+Quick, is `'i'` equal to `'eye'`?!..
+
+TODO: think & write about it here...
+
+
+## User-defined types
+
+Simple types consisting of a bunch of fields:
+```
+>>> "type point ex why end"
+
+>>> "one two point store pea"
+
+>>> "pea get ex print"
+"one"
+
+>>> "pea"
+"one two point"
+```
+
+Adding methods to types (including "special" methods, like the one used
+for representation):
+```
+>>> type url: s ;
+
+>>> url.repr: .s 'url' + ;
+
+>>> 'www.example.com' url =u
+
+>>> u
+'www.example.com' url
+```
+
+...same example, as audio:
+```
+>>> "type url ess end"
+
+>>> "define url dot repr get ess word url plus end"
+
+>>> "seven words w w w dot example dot com url"
+"seven words w w w dot example dot com url"
+```
