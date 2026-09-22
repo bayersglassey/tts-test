@@ -12,6 +12,20 @@ DynamicNodeFunc = Callable[['DynamicNode', 'Graph'], Optional[TextAndOptions]]
 ActionNodeFunc = Callable[['ActionNode', 'Graph'], None]
 
 
+NUMBERS = {
+    'zero': 0,
+    'one': 1,
+    'two': 2,
+    'three': 3,
+    'four': 4,
+    'five': 5,
+    'six': 6,
+    'seven': 7,
+    'eight': 8,
+    'nine': 9,
+}
+
+
 class Graph:
 
     def __init__(self):
@@ -25,6 +39,19 @@ class Graph:
         self.tts.load()
         self.tts_speed = 1.5
         self.saying_uses_audio = True
+
+    def use_listen_with_audio(self):
+        from moonshine_voice import MicTranscriber
+        from threading import Event
+        self.mic = MicTranscriber()
+        self.mic.load()
+        self.mic_event = Event()
+        def line_handler(line):
+            print(line.text, flush=True)
+            self.mic_text = line.text
+            self.mic_event.set()
+        self.mic.on_line(line_handler)
+        self.listening_uses_audio = True
 
     def static(self, id: str, name: str, *, text: str = None, options: Options):
         if id in self.nodes:
@@ -67,11 +94,26 @@ class Graph:
             self.tts.say(msg, speed=self.tts_speed)
 
     def listen(self) -> str:
-        # TODO: add an audio input interface
-        text = input('> ')
-        if self.saying_uses_audio:
-            self.stop_tts()
-        return text
+        if self.listening_uses_audio:
+            print('> ', end='', flush=True)
+            self.mic.start()
+            while not self.mic_event.wait(timeout=5.0):
+                self.say("I didn't hear you.")
+                print('> ', end='', flush=True)
+            self.mic.stop()
+            self.mic_event.clear()
+            text = self.mic_text
+            text = ''.join(
+                c for c in self.mic_text.lower()
+                if c.isalnum() or c == ' ')
+            text = str(NUMBERS.get(text, text))
+            print(f'=> {text}')
+            return text
+        else:
+            text = input('> ')
+            if self.saying_uses_audio:
+                self.stop_tts()
+            return text
 
     def stop_tts(self):
         if not self.saying_uses_audio:
@@ -101,6 +143,7 @@ class Graph:
 
     def _loop(self, node: 'Node'):
         while True:
+            print()
 
             # Display node's name and text (if any)
             self.say(f"This is {node.name}.")

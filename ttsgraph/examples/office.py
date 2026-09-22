@@ -51,6 +51,7 @@ def main():
         return 'schedule'
 
     graph.use_say_with_audio()
+    graph.use_listen_with_audio()
     graph.loop('root')
 
 
