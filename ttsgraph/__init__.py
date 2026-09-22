@@ -93,6 +93,13 @@ class Graph:
         if self.saying_uses_audio:
             self.tts.say(msg, speed=self.tts_speed)
 
+    def _normalize_text(self, text: str) -> str:
+        text = ''.join(
+            c for c in text.lower()
+            if c.isalnum() or c == ' ')
+        text = str(NUMBERS.get(text, text))
+        return text
+
     def listen(self) -> str:
         if self.listening_uses_audio:
             print('> ', end='', flush=True)
@@ -102,18 +109,14 @@ class Graph:
                 print('> ', end='', flush=True)
             self.mic.stop()
             self.mic_event.clear()
-            text = self.mic_text
-            text = ''.join(
-                c for c in self.mic_text.lower()
-                if c.isalnum() or c == ' ')
-            text = str(NUMBERS.get(text, text))
+            text = self._normalize_text(self.mic_text)
             print(f'=> {text}')
             return text
         else:
             text = input('> ')
             if self.saying_uses_audio:
                 self.stop_tts()
-            return text
+            return self._normalize_text(text)
 
     def stop_tts(self):
         if not self.saying_uses_audio:
@@ -163,7 +166,7 @@ class Graph:
                 self.say(f"{option} is {next_node.name}.")
 
             # Get an option from user
-            option = self.listen()
+            option = self.listen().lower()
 
             # Try to map the option onto a node
             next_node = None
@@ -171,7 +174,7 @@ class Graph:
                 next_node = options[option]
             else:
                 for maybe_next_node in options.values():
-                    if option == maybe_next_node.name:
+                    if option == maybe_next_node.name.lower():
                         next_node = maybe_next_node
                         break
 
