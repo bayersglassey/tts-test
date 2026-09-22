@@ -15,7 +15,16 @@ ActionNodeFunc = Callable[['ActionNode', 'Graph'], None]
 class Graph:
 
     def __init__(self):
+        self.saying_uses_audio = False
+        self.listening_uses_audio = False
         self.nodes: dict[str, Node] = {}
+
+    def use_say_with_audio(self):
+        from moonshine_voice import TextToSpeech
+        self.tts = TextToSpeech()
+        self.tts.load()
+        self.tts_speed = 1.5
+        self.saying_uses_audio = True
 
     def static(self, id: str, name: str, *, text: str = None, options: Options):
         if id in self.nodes:
@@ -53,12 +62,29 @@ class Graph:
         return response in ('yes', 'yeah', 'okay', 'ok')
 
     def say(self, msg: str):
-        # TODO: add an audio interface
         print(msg)
+        if self.saying_uses_audio:
+            self.tts.say(msg, speed=self.tts_speed)
 
     def listen(self) -> str:
-        # TODO: add an audio interface
-        return input('> ')
+        # TODO: add an audio input interface
+        text = input('> ')
+        if self.saying_uses_audio:
+            self.stop_tts()
+        return text
+
+    def stop_tts(self):
+        if not self.saying_uses_audio:
+            pass
+        # Stopping the tts should be as simple as: self.tts.stop()
+        # ...unfortunately, that's currently broken for me:
+        #   Expression 'alsa_snd_pcm_mmap_begin( self->pcm, &areas, &self->offset, numFrames )' failed in 'src/hostapi/alsa/pa_linux_alsa.c', line: 3994
+        #   Expression 'PaAlsaStreamComponent_RegisterChannels( &self->playback, &self->bufferProcessor, &playbackFrames, &xrun )' failed in 'src/hostapi/alsa/pa_linux_alsa.c', line: 4114
+        #   Expression 'PaAlsaStream_SetUpBuffers( stream, &framesGot, &xrun )' failed in 'src/hostapi/alsa/pa_linux_alsa.c', line: 4491
+        #   TextToSpeech: playback worker failed to play an utterance:
+        #   Segmentation fault
+        # ...so, for now, we need to wait for the tts to finish... boooo
+        self.tts.wait()
 
     def say_okay(self):
         self.say("Okay.")
@@ -70,6 +96,8 @@ class Graph:
             self._loop(node)
         except KeyboardInterrupt:
             pass
+        finally:
+            self.stop_tts()
 
     def _loop(self, node: 'Node'):
         while True:
@@ -87,7 +115,7 @@ class Graph:
                 for k, v in node.options.items()}
 
             # Tell user about the options
-            self.say("The options here are:")
+            self.say("Options:")
             for option, next_node in options.items():
                 self.say(f"{option} is {next_node.name}.")
 

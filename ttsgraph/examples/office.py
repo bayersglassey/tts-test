@@ -7,7 +7,7 @@ def main():
     # TODO: fancier schedule structure...
     schedule: list[str] = [
         "lunch today",
-        "2pm tomorrow",
+        "2 PM tomorrow",
         "next week",
     ]
     current_appointment: Optional[str] = None
@@ -18,7 +18,7 @@ def main():
         options={1: 'hours', 2: 'schedule'})
 
     graph.message('hours', "Office hours",
-        "The office is open between 8AM and 12PM.")
+        "The office is open between 8 AM and 12 PM.")
 
     @graph.dynamic('schedule', "Schedule of appointments")
     def _(self, graph):
@@ -50,6 +50,7 @@ def main():
         graph.say_okay()
         return 'schedule'
 
+    graph.use_say_with_audio()
     graph.loop('root')
 
 
