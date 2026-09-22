@@ -1,2 +1,4 @@
 *.onnx
 *.bin
+*.pyc
+*.swp

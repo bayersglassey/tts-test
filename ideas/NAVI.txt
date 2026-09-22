@@ -1,0 +1,49 @@
+# Audio navigation
+
+Let's say getting phone calls from bots became more common, or we wanted to
+interact with a computer using our voice.
+Let's also assume that we want this interaction to be fairly precise: we
+don't want a bot trying to "sound human", rather we know that this is a
+computer system and we want to control it quickly and precisely.
+
+Other computer interfaces have started off as simulations or metaphors for
+a real-life concept, for instance the idea of "folders" on a "desktop" which
+you move around with your mouse, as if they were paper folders on a desk.
+But over time, these interfaces tend to become specialized for the computer
+realm: folders can be resized and "minimized", have "back" buttons, etc, not
+because paper folders do these things, but because the ability to do these
+things with computer folders is useful.
+In other words, over time the physical metaphor ceases to be as important,
+and actual usability becomes more important.
+
+So, how do we do something like that for an audio interface?
+Let's think about the use case of managing dates in a schedule, for instance
+when you call a doctor's office; and let's also think about nagivating a
+large JSON object, a relational database, and a filesystem.
+
+Let's assume that the system can be modeled as a graph of nodes, often a
+tree, but not necessarily.
+I imagine a system where:
+* There is a current node
+* Every node has a short name
+* Every node has a longer description
+* Every node has zero or more outgoing edges
+* Every outgoing edge has a short name (often a number, or "back")
+* The interface is in request/response style: the user gives commands,
+  the system responds
+* An "option" means the short name of an edge or the node it points to
+* The user can say "list options", and the system will list the outgoing
+  edges by saying "<edge name> is <node name>." for each one
+* The user can say "what's <option>?", and the system will say
+  "<edge name> is <node name>."
+* The user can say "what's <n> through "m"?", where n and m are numbers,
+  and the system will say "<edge name> is <node name>." for the options
+  named n, n+1, ..., m.
+* The user can say "describe <option>", and the system will give the
+  long description of the corresponding node
+* The user can change the current node by saying "<option>"
+
+Then we can extend this basic system with options which are actions, not
+nodes.
+
+SEE: the ttsgraph module in this repo...
