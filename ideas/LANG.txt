@@ -220,7 +220,7 @@ Simple types consisting of a bunch of fields:
 >>> "pea get ex print"
 "one"
 
->>> "pea"
+>>> "pea print"
 "one two point"
 ```
 
